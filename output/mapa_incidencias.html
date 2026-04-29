@@ -45,7 +45,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
 <div id="header">
   <div><div class="titulo">Mapa de Incidencias</div>
   <div class="sub">Obras de Emergencia 2026 &mdash; &Aacute;rea de Calidad Ambiental. Confederaci&oacute;n Hidrogr&aacute;fica del Guadiana</div></div>
-  <div class="meta">Actualizado:<br>29/04/2026 13:05</div>
+  <div class="meta">Actualizado:<br>29/04/2026 14:23</div>
 </div>
 <div id="kpis">
 <div class="kpi total"><div class="valor" id="kpi-total">5</div><div class="etiqueta">Total</div></div>
@@ -53,6 +53,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
 <div class="kpi notif"><div class="valor" id="kpi-notif">3</div><div class="etiqueta">Notificadas</div></div>
 <div class="kpi ejec"><div class="valor" id="kpi-ejec">1</div><div class="etiqueta">En ejecuci&oacute;n</div></div>
 <div class="kpi resuel"><div class="valor" id="kpi-resuel">0</div><div class="etiqueta">Resueltas</div></div>
+<div class="kpi" style="border-top:2px solid #7f8c8d"><div class="valor" id="kpi-cerr" style="color:#7f8c8d">1</div><div class="etiqueta">Cerradas</div></div>
 <div class="kpi-sep"></div>
 <div class="kpi urg" data-urgencia="Critica"><div class="valor" id="kpi-urg-critica" style="color:#6c2be2">2</div><div class="etiqueta">Urg. Critica</div></div>
 <div class="kpi urg" data-urgencia="Alta"><div class="valor" id="kpi-urg-alta" style="color:#c0392b">1</div><div class="etiqueta">Urg. Alta</div></div>
@@ -64,7 +65,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
 <div class="filtro-grupo"><h3>Estado</h3>
 <label class="check-label"><input type="checkbox" class="chk-estado" value="Notificada" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#e74c3c"></span> Notificada</label>
 <label class="check-label"><input type="checkbox" class="chk-estado" value="En ejecucion" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#e67e22"></span> En ejecuci&oacute;n</label>
-<label class="check-label"><input type="checkbox" class="chk-estado" value="Resuelta" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#27ae60"></span> Resuelta</label>
+<label class="check-label"><input type="checkbox" class="chk-estado" value="Cerrada" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#7f8c8d"></span> Cerrada</label>
 </div>
 <div class="filtro-grupo"><h3>Urgencia</h3>
 <div class="leyenda-nota">&#9679; tama&ntilde;o = urgencia</div>
@@ -84,7 +85,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
 </div>
 <script>
 const INCIDENCIAS=[{"codigo": "INC-20260426-Eucalipto_Pesquera_Badajoz", "nombre": "Eucalipto Pesquera Badajoz", "localizacion": "Azud Pesquera Badajoz", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "26/04/2026", "persona": "A_Valverde", "descripcion": "Eucalipto con peligro  de vuelco sobre construcción", "urgencia": "Media", "equipos": "Camion portacontenedores+pluma Camion/Plataforma elevadora Cuadrilla forestal Skidder", "observaciones": "", "estado": "Notificada", "lat": 38.891185, "lon": -6.969799, "seguimientos": []}, {"codigo": "INC-20260426-Arrastres_Guadiana__Valverde", "nombre": "Arrastres_Guadiana _Valverde", "localizacion": "Margen derecha Guadiana en Valverde de Mérida", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "16/04/2026", "persona": "A_Corbacho", "descripcion": "Limpieza de arrastres y árboles caídos en zona de DPH", "urgencia": "Baja", "equipos": "Retroexcavadora Camion volquete Cuadrilla forestal Autocargador OTRO", "observaciones": "", "estado": "Notificada", "lat": 38.911087, "lon": -6.189583, "seguimientos": []}, {"codigo": "INC-20260426-pino_Presa_Monijo", "nombre": "pino_Presa_Monijo", "localizacion": "Presa de Montijo", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "14/04/2026", "persona": "GTA", "descripcion": "Pino con peligro de caída sobre LMT", "urgencia": "Critica", "equipos": "Camion portacontenedores+pluma Camion/Plataforma elevadora", "observaciones": "", "estado": "Notificada", "lat": 38.923712, "lon": -6.429864, "seguimientos": []}, {"codigo": "INC-20260429-Caminos_Guadiana_Villagonzalo", "nombre": "Caminos_Guadiana_Villagonzalo", "localizacion": "Ermita de San Isidro Villagonzalo", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "26/04/2026", "persona": "OTRO", "descripcion": "Reconstrucción de caminos erosionados", "urgencia": "Alta", "equipos": "Motoniveladora Compactador", "observaciones": "", "estado": "Cerrada", "lat": 38.857693, "lon": -6.224713, "seguimientos": []}, {"codigo": "INC-20260429-Caída_de_eucalipto_sobre_LMT", "nombre": "Caída de eucalipto sobre LMT", "localizacion": "Margen derecha Limonetes, aguas abajo antigua N-V", "contrato": "LOTE3_LIMONETES", "fecha": "29/04/2026", "persona": "JM_Jimenez", "descripcion": "Caída de un eucalipto de grandes dimensiones sobre línea titularidad de Endesa", "urgencia": "Critica", "equipos": "Retroexcavadora Camion portacontenedores+pluma Cuadrilla forestal Skidder", "observaciones": "Necesaria coordinación con Endesa", "estado": "En ejecucion", "lat": 38.880812, "lon": -6.777526, "seguimientos": []}];
-const COLORES_ESTADO={"Notificada":"#e74c3c","En ejecucion":"#e67e22","Resuelta":"#27ae60"};
+const COLORES_ESTADO={"Notificada": "#e74c3c", "En ejecucion": "#e67e22", "Cerrada": "#7f8c8d"};
 const COLORES_URGENCIA={"Critica": "#6c2be2", "Alta": "#c0392b", "Media": "#d35400", "Baja": "#2980b9"};
 const RADIOS_URGENCIA={"Critica": 16, "Alta": 12, "Media": 9, "Baja": 6};
 function colorEstado(e){return COLORES_ESTADO[e]||"#3498db";}
@@ -128,18 +129,19 @@ function aplicarFiltros(){
   const est=sel("chk-estado"),urg=sel("chk-urgencia"),cont=sel("chk-contrato");
   mLayer.clearLayers();
   let vis=0;
-  const kE={Notificada:0,"En ejecucion":0,Resuelta:0},kU={};
+  const kE={},kU={};
   INCIDENCIAS.forEach(function(inc){
     if(est.includes(inc.estado)&&urg.includes(inc.urgencia)&&(cont.length===0||cont.includes(inc.contrato))){
       mLayer.addLayer(crearMarcador(inc));vis++;
-      if(kE[inc.estado]!==undefined)kE[inc.estado]++;
+      kE[inc.estado]=(kE[inc.estado]||0)+1;
       if(inc.urgencia)kU[inc.urgencia]=(kU[inc.urgencia]||0)+1;
     }
   });
   document.getElementById("kpi-total").textContent=vis;
-  document.getElementById("kpi-notif").textContent=kE["Notificada"];
-  document.getElementById("kpi-ejec").textContent=kE["En ejecucion"];
-  document.getElementById("kpi-resuel").textContent=kE["Resuelta"];
+  document.getElementById("kpi-notif").textContent=kE["Notificada"]||0;
+  document.getElementById("kpi-ejec").textContent=kE["En ejecucion"]||0;
+  document.getElementById("kpi-resuel").textContent=kE["Resuelta"]||0;
+  if(document.getElementById("kpi-cerr"))document.getElementById("kpi-cerr").textContent=kE["Cerrada"]||0;
   document.querySelectorAll(".kpi.urg").forEach(function(card){
     const el=card.querySelector(".valor");
     if(el)el.textContent=kU[card.dataset.urgencia]||0;

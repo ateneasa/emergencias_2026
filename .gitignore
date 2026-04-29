@@ -2,3 +2,7 @@ input/
 *.xlsx
 *.csv
 __pycache__/
+~$*
+output/*.tmp
+output/.~*
+output/fotos_procesadas/

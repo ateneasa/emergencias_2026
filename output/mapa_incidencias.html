@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Mapa de Incidencias &mdash; Obras de Emergencia 2026</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
+#header{background:linear-gradient(135deg,#1a3a5c,#2980b9);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#header .titulo{font-size:1.1rem;font-weight:600}
+#header .sub{font-size:.76rem;opacity:.82;margin-top:3px}
+#header .meta{font-size:.72rem;opacity:.7;text-align:right}
+#kpis{display:flex;gap:8px;padding:10px 14px;background:#fff;border-bottom:1px solid #dde;flex-wrap:wrap;align-items:stretch}
+.kpi{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:80px;padding:7px 12px;border-radius:8px;background:#f7f9fc;border:1px solid #e0e6ef}
+.kpi .valor{font-size:1.6rem;font-weight:700;line-height:1}
+.kpi .etiqueta{font-size:.64rem;color:#666;margin-top:3px;text-align:center;text-transform:uppercase;letter-spacing:.4px}
+.kpi.total .valor{color:#2c3e50}.kpi.notif .valor{color:#e74c3c}.kpi.ejec .valor{color:#e67e22}.kpi.resuel .valor{color:#27ae60}
+.kpi-sep{width:1px;background:#dde;align-self:stretch;margin:0 2px}
+#main{display:flex;height:calc(100vh - 122px)}
+#panel{width:226px;min-width:186px;background:#fff;border-right:1px solid #dde;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:16px}
+.filtro-grupo h3{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#555;margin-bottom:7px;padding-bottom:4px;border-bottom:2px solid #e0e6ef}
+.check-label{display:flex;align-items:center;gap:7px;padding:4px 2px;font-size:.84rem;cursor:pointer;border-radius:4px;transition:background .15s}
+.check-label:hover{background:#f0f4f8}
+.check-label input[type=checkbox]{display:none}
+.check-custom{width:15px;height:15px;border:2px solid #aab;border-radius:3px;flex-shrink:0;position:relative;background:#fff;transition:all .15s}
+.check-label input:checked+.check-custom{background:#2980b9;border-color:#2980b9}
+.check-label input:checked+.check-custom::after{content:'';position:absolute;left:3px;top:0;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dot-urg{display:inline-block;border-radius:50%;background:#555;opacity:.7;flex-shrink:0}
+.leyenda-nota{font-size:.68rem;color:#888;font-style:italic;line-height:1.4;padding:0 2px;margin-bottom:4px}
+.btn-reset{width:100%;padding:7px;background:#2980b9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600;transition:background .2s}
+.btn-reset:hover{background:#1a6fa3}
+#contador{font-size:.74rem;color:#888;text-align:center}
+#map{flex:1}
+.leaflet-popup-content{min-width:250px;max-width:340px;font-size:.84rem;line-height:1.5}
+.popup-titulo{font-size:.95rem;font-weight:700;color:#1a3a5c;margin-bottom:5px;padding-bottom:4px;border-bottom:2px solid #e0e6ef}
+.popup-estado{display:inline-block;padding:2px 8px;border-radius:12px;color:#fff;font-size:.72rem;font-weight:600;margin-bottom:7px}
+.popup-fila{margin-bottom:3px}.popup-fila b{color:#444}
+.popup-sep{border:none;border-top:1px solid #eee;margin:7px 0}
+.popup-seg{background:#f7f9fc;border-left:3px solid #2980b9;padding:4px 7px;margin-top:4px;border-radius:0 4px 4px 0;font-size:.78rem}</style>
+</head>
+<body>
+<div id="header">
+  <div><div class="titulo">Mapa de Incidencias</div>
+  <div class="sub">Obras de Emergencia 2026 &mdash; &Aacute;rea de Calidad Ambiental. Confederaci&oacute;n Hidrogr&aacute;fica del Guadiana</div></div>
+  <div class="meta">Actualizado:<br>28/04/2026 16:20</div>
+</div>
+<div id="kpis">
+<div class="kpi total"><div class="valor" id="kpi-total">4</div><div class="etiqueta">Total</div></div>
+<div class="kpi-sep"></div>
+<div class="kpi notif"><div class="valor" id="kpi-notif">3</div><div class="etiqueta">Notificadas</div></div>
+<div class="kpi ejec"><div class="valor" id="kpi-ejec">1</div><div class="etiqueta">En ejecuci&oacute;n</div></div>
+<div class="kpi resuel"><div class="valor" id="kpi-resuel">0</div><div class="etiqueta">Resueltas</div></div>
+<div class="kpi-sep"></div>
+<div class="kpi urg" data-urgencia="Critica"><div class="valor" id="kpi-urg-critica" style="color:#6c2be2">1</div><div class="etiqueta">Urg. Critica</div></div>
+<div class="kpi urg" data-urgencia="Alta"><div class="valor" id="kpi-urg-alta" style="color:#c0392b">1</div><div class="etiqueta">Urg. Alta</div></div>
+<div class="kpi urg" data-urgencia="Media"><div class="valor" id="kpi-urg-media" style="color:#d35400">1</div><div class="etiqueta">Urg. Media</div></div>
+<div class="kpi urg" data-urgencia="Baja"><div class="valor" id="kpi-urg-baja" style="color:#2980b9">1</div><div class="etiqueta">Urg. Baja</div></div>
+</div>
+<div id="main">
+<div id="panel">
+<div class="filtro-grupo"><h3>Estado</h3>
+<label class="check-label"><input type="checkbox" class="chk-estado" value="Notificada" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#e74c3c"></span> Notificada</label>
+<label class="check-label"><input type="checkbox" class="chk-estado" value="En ejecucion" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#e67e22"></span> En ejecuci&oacute;n</label>
+<label class="check-label"><input type="checkbox" class="chk-estado" value="Resuelta" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot" style="background:#27ae60"></span> Resuelta</label>
+</div>
+<div class="filtro-grupo"><h3>Urgencia</h3>
+<div class="leyenda-nota">&#9679; tama&ntilde;o = urgencia</div>
+<label class="check-label"><input type="checkbox" class="chk-urgencia" value="Critica" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot-urg" style="width:22px;height:22px"></span> <span style="color:#6c2be2;font-weight:600">Critica</span></label>
+<label class="check-label"><input type="checkbox" class="chk-urgencia" value="Alta" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot-urg" style="width:16px;height:16px"></span> <span style="color:#c0392b;font-weight:600">Alta</span></label>
+<label class="check-label"><input type="checkbox" class="chk-urgencia" value="Media" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot-urg" style="width:12px;height:12px"></span> <span style="color:#d35400;font-weight:600">Media</span></label>
+<label class="check-label"><input type="checkbox" class="chk-urgencia" value="Baja" checked onchange="aplicarFiltros()"><span class="check-custom"></span><span class="dot-urg" style="width:8px;height:8px"></span> <span style="color:#2980b9;font-weight:600">Baja</span></label>
+</div>
+<div class="filtro-grupo"><h3>Contrato / Lote</h3>
+<label class="check-label"><input type="checkbox" class="chk-contrato" value="LOTE1_VEGAS_ALTAS" checked onchange="aplicarFiltros()"><span class="check-custom"></span>LOTE1_VEGAS_ALTAS</label>
+</div>
+<button class="btn-reset" onclick="resetFiltros()">&#8634; Mostrar todo</button>
+<div id="contador"></div>
+</div>
+<div id="map"></div>
+</div>
+<script>
+const INCIDENCIAS=[{"codigo": "INC-20260426-Eucalipto_Pesquera_Badajoz", "nombre": "Eucalipto Pesquera Badajoz", "localizacion": "Azud Pesquera Badajoz", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "26/04/2026", "persona": "A_Valverde", "descripcion": "Eucalipto con peligro  de vuelco sobre construcción", "urgencia": "Media", "equipos": "Camion portacontenedores+pluma Camion/Plataforma elevadora Cuadrilla forestal Skidder", "observaciones": "", "estado": "Notificada", "lat": 38.891185, "lon": -6.969799, "seguimientos": []}, {"codigo": "INC-20260426-Arrastres_Guadiana__Valverde", "nombre": "Arrastres_Guadiana _Valverde", "localizacion": "Margen derecha Guadiana en Valverde de Mérida", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "16/04/2026", "persona": "A_Corbacho", "descripcion": "Limpieza de arrastres y árboles caídos en zona de DPH", "urgencia": "Baja", "equipos": "Retroexcavadora Camion volquete Cuadrilla forestal Autocargador OTRO", "observaciones": "", "estado": "Notificada", "lat": 38.911087, "lon": -6.189583, "seguimientos": []}, {"codigo": "INC-20260426-pino_Presa_Monijo", "nombre": "pino_Presa_Monijo", "localizacion": "Presa de Montijo", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "14/04/2026", "persona": "GTA", "descripcion": "Pino con peligro de caída sobre LMT", "urgencia": "Critica", "equipos": "Camion portacontenedores+pluma Camion/Plataforma elevadora", "observaciones": "", "estado": "Notificada", "lat": 38.923712, "lon": -6.429864, "seguimientos": []}, {"codigo": "INC-20260426-Caminos_Guadiana_Villagonzalo", "nombre": "Caminos_Guadiana_Villagonzalo", "localizacion": "Ermita de San Isidro Villagonzalo", "contrato": "LOTE1_VEGAS_ALTAS", "fecha": "26/04/2026", "persona": "OTRO", "descripcion": "Reconstrucción de caminos erosionados", "urgencia": "Alta", "equipos": "Motoniveladora Compactador", "observaciones": "", "estado": "En ejecucion", "lat": 38.857693, "lon": -6.224713, "seguimientos": []}];
+const COLORES_ESTADO={"Notificada":"#e74c3c","En ejecucion":"#e67e22","Resuelta":"#27ae60"};
+const COLORES_URGENCIA={"Critica": "#6c2be2", "Alta": "#c0392b", "Media": "#d35400", "Baja": "#2980b9"};
+const RADIOS_URGENCIA={"Critica": 16, "Alta": 12, "Media": 9, "Baja": 6};
+function colorEstado(e){return COLORES_ESTADO[e]||"#3498db";}
+function radioUrg(u){return RADIOS_URGENCIA[u]||9;}
+const map=L.map("map");
+L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{attribution:"\u00a9 <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors \u00a9 <a href='https://carto.com/attributions'>CARTO</a>",subdomains:"abcd",maxZoom:19}).addTo(map);
+let mLayer=L.layerGroup().addTo(map);
+function crearPopup(inc){
+  const col=colorEstado(inc.estado);
+  let h='<div class="popup-titulo">'+inc.codigo+' — '+inc.nombre+'</div>';
+  h+='<span class="popup-estado" style="background:'+col+'">'+inc.estado+'</span>';
+  h+='<div class="popup-fila"><b>📍 Localización:</b> '+inc.localizacion+'</div>';
+  h+='<div class="popup-fila"><b>Contrato:</b> '+inc.contrato+'</div>';
+  h+='<div class="popup-fila"><b>Fecha apertura:</b> '+inc.fecha+'</div>';
+  const cu=COLORES_URGENCIA[inc.urgencia]||"#777";
+  h+='<div class="popup-fila"><b>Urgencia:</b> <span style="color:'+cu+';font-weight:700">'+inc.urgencia+'</span></div>';
+  h+='<div class="popup-fila"><b>Abierta por:</b> '+inc.persona+'</div>';
+  if(inc.descripcion) h+='<hr class="popup-sep"><div class="popup-fila"><b>Descripción:</b><br>'+inc.descripcion+'</div>';
+  if(inc.observaciones) h+='<div class="popup-fila"><b>Observaciones:</b><br>'+inc.observaciones+'</div>';
+  if(inc.equipos) h+='<div class="popup-fila"><b>Equipos previstos:</b> '+inc.equipos+'</div>';
+  if(inc.seguimientos&&inc.seguimientos.length>0){
+    h+='<hr class="popup-sep"><b>Seguimientos ('+inc.seguimientos.length+'):</b>';
+    inc.seguimientos.forEach(function(s){
+      h+='<div class="popup-seg">📅 '+s.fecha_inspeccion+' — '+s.inspector+'<br>Ref: '+s.referencia+' — Estado: '+s.estado_actualizado;
+      if(s.obs_inspeccion) h+='<br>'+s.obs_inspeccion;
+      h+='</div>';
+    });
+  }
+  return h;
+}
+function crearMarcador(inc){
+  const m=L.circleMarker([inc.lat,inc.lon],{
+    radius:radioUrg(inc.urgencia),fillColor:colorEstado(inc.estado),
+    color:"#fff",weight:2,opacity:1,fillOpacity:0.9});
+  m.bindPopup(crearPopup(inc),{maxWidth:360});
+  m.bindTooltip(inc.codigo+" — "+inc.nombre+" ["+inc.urgencia+"]",{direction:"top",offset:[0,-8]});
+  return m;
+}
+function sel(cls){return Array.from(document.querySelectorAll("."+cls+":checked")).map(function(c){return c.value;});}
+function aplicarFiltros(){
+  const est=sel("chk-estado"),urg=sel("chk-urgencia"),cont=sel("chk-contrato");
+  mLayer.clearLayers();
+  let vis=0;
+  const kE={Notificada:0,"En ejecucion":0,Resuelta:0},kU={};
+  INCIDENCIAS.forEach(function(inc){
+    if(est.includes(inc.estado)&&urg.includes(inc.urgencia)&&(cont.length===0||cont.includes(inc.contrato))){
+      mLayer.addLayer(crearMarcador(inc));vis++;
+      if(kE[inc.estado]!==undefined)kE[inc.estado]++;
+      if(inc.urgencia)kU[inc.urgencia]=(kU[inc.urgencia]||0)+1;
+    }
+  });
+  document.getElementById("kpi-total").textContent=vis;
+  document.getElementById("kpi-notif").textContent=kE["Notificada"];
+  document.getElementById("kpi-ejec").textContent=kE["En ejecucion"];
+  document.getElementById("kpi-resuel").textContent=kE["Resuelta"];
+  document.querySelectorAll(".kpi.urg").forEach(function(card){
+    const el=card.querySelector(".valor");
+    if(el)el.textContent=kU[card.dataset.urgencia]||0;
+  });
+  document.getElementById("contador").textContent=
+    vis===INCIDENCIAS.length?"Mostrando todas ("+vis+")":"Mostrando "+vis+" de "+INCIDENCIAS.length;
+}
+function resetFiltros(){document.querySelectorAll("input[type=checkbox]").forEach(function(c){c.checked=true;});aplicarFiltros();}
+aplicarFiltros();
+if(INCIDENCIAS.length>0){map.fitBounds(L.latLngBounds(INCIDENCIAS.map(function(i){return[i.lat,i.lon];})).pad(0.15));}
+else{map.setView([38.9,-6.3],10);}
+</script>
+</body>
+</html>

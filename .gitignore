@@ -1,0 +1,4 @@
+input/
+*.xlsx
+*.csv
+__pycache__/

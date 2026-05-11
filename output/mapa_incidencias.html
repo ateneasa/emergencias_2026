@@ -45,7 +45,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
 <div id="header">
   <div><div class="titulo">Mapa de Incidencias</div>
   <div class="sub">Obras de Emergencia 2026 &mdash; &Aacute;rea de Calidad Ambiental. Confederaci&oacute;n Hidrogr&aacute;fica del Guadiana</div></div>
-  <div class="meta">Actualizado:<br>11/05/2026 17:05</div>
+  <div class="meta">Actualizado:<br>11/05/2026 18:01</div>
 </div>
 <div id="kpis">
 <div class="kpi total"><div class="valor" id="kpi-total">11</div><div class="etiqueta">Total</div></div>
@@ -88,7 +88,11 @@ const RADIOS_URGENCIA={"Alta": 12, "Media": 9, "Baja": 6};
 function colorEstado(e){return COLORES_ESTADO[e]||"#3498db";}
 function radioUrg(u){return RADIOS_URGENCIA[u]||9;}
 const map=L.map("map");
-L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{attribution:"\u00a9 <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors \u00a9 <a href='https://carto.com/attributions'>CARTO</a>",subdomains:"abcd",maxZoom:19}).addTo(map);
+const capaCalles=L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",{attribution:"\u00a9 <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors \u00a9 <a href='https://carto.com/attributions'>CARTO</a>",subdomains:"abcd",maxZoom:19});
+const capaSatelite=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Tiles \u00a9 Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",maxZoom:19});
+const capaHibrida=L.layerGroup([capaSatelite,L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxZoom:19,opacity:0.85})]);
+capaCalles.addTo(map);
+L.control.layers({"\uD83D\uDDFA\uFE0F Calles (CartoDB)":capaCalles,"\uD83D\uDEF0\uFE0F Sat\u00e9lite (Esri)":capaSatelite,"\uD83D\uDEF0\uFE0F H\u00edbrido (sat\u00e9lite + nombres)":capaHibrida},{},{position:"topright",collapsed:false}).addTo(map);
 let mLayer=L.layerGroup().addTo(map);
 function crearPopup(inc){
   const col=colorEstado(inc.estado);
@@ -150,6 +154,22 @@ function resetFiltros(){document.querySelectorAll("input[type=checkbox]").forEac
 aplicarFiltros();
 if(INCIDENCIAS.length>0){map.fitBounds(L.latLngBounds(INCIDENCIAS.map(function(i){return[i.lat,i.lon];})).pad(0.15));}
 else{map.setView([38.9,-6.3],10);}
+var markerGeo=null;
+map.locate({watch:true,enableHighAccuracy:true});
+map.on("locationfound",function(e){
+  if(markerGeo)markerGeo.remove();
+  markerGeo=L.circleMarker(e.latlng,{
+    radius:10,color:"#0055cc",weight:2,
+    fillColor:"#2980b9",fillOpacity:0.85
+  }).addTo(map)
+  .bindTooltip("\uD83D\uDCCD Tu posici\u00f3n actual",{permanent:false,direction:"top"});
+  if(e.accuracy>500){
+    L.circle(e.latlng,{radius:e.accuracy,color:"#2980b9",fillOpacity:0.08,weight:1}).addTo(map);
+  }
+});
+map.on("locationerror",function(){
+  console.log("Geolocalizacion no disponible o denegada por el usuario.");
+});
 </script>
 </body>
 </html>

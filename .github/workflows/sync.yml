@@ -3,15 +3,20 @@ name: Sync to valverdino
 on:
   push:
     branches: ["**"]
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Mirror to valverdino
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Push to valverdino
+
+      - name: Push mirror
         run: |
-          git remote add valverdino https://x-access-token:${{ secrets.VALVERDINO_TOKEN }}@github.com/valverdino/${{ github.event.repository.name }}.git
-          git push valverdino --all --force
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git remote add valverdino https://valverdino:${{ secrets.VALVERDINO_TOKEN }}@github.com/valverdino/${{ github.event.repository.name }}.git
+          git push valverdino --mirror --force

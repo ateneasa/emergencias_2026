@@ -9,14 +9,20 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Mirror to valverdino
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Push mirror
+      - name: Setup SSH
         run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          git remote add valverdino https://valverdino:${{ secrets.VALVERDINO_TOKEN }}@github.com/valverdino/${{ github.event.repository.name }}.git
-          git push valverdino --mirror --force
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VALVERDINO_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Push via SSH
+        run: |
+          git remote add valverdino git@github.com:valverdino/emergencias_2026.git
+          git push valverdino --all --force
+          git push valverdino --tags --force

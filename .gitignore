@@ -1,8 +1,16 @@
-input/
-*.xlsx
-*.csv
-__pycache__/
-~$*
-output/*.tmp
-output/.~*
-output/fotos_procesadas/
+# ---------------------------------------------------------------
+# REPOSITORIO PUBLICO (ateneasa/emergencias_2026)
+# Por defecto NO se publica nada.
+# Solo se publica lo que aparece abajo precedido de "!".
+# Para publicar un archivo nuevo, hay que anadirlo aqui a mano.
+# ---------------------------------------------------------------
+
+/*
+
+!/.gitignore
+!/.nojekyll
+!/index.html
+
+!/output/
+/output/*
+!/output/mapa_incidencias.html

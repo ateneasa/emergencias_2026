@@ -39,13 +39,81 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#2c3e50}
 .popup-estado{display:inline-block;padding:2px 8px;border-radius:12px;color:#fff;font-size:.72rem;font-weight:600;margin-bottom:7px}
 .popup-fila{margin-bottom:3px}.popup-fila b{color:#444}
 .popup-sep{border:none;border-top:1px solid #eee;margin:7px 0}
-.popup-seg{background:#f7f9fc;border-left:3px solid #2980b9;padding:4px 7px;margin-top:4px;border-radius:0 4px 4px 0;font-size:.78rem}</style>
+.popup-seg{background:#f7f9fc;border-left:3px solid #2980b9;padding:4px 7px;margin-top:4px;border-radius:0 4px 4px 0;font-size:.78rem}
+/* ================= Soporte movil (agosto 2026) =================
+   Elementos nuevos: ocultos por defecto, la vista de escritorio no cambia.
+   Todo lo que reajusta el diseno existente va dentro del @media de abajo. */
+#btn-filtros{display:none;position:fixed;right:14px;bottom:16px;z-index:1150;
+ align-items:center;gap:8px;padding:13px 18px;border:none;border-radius:26px;
+ background:#1a3a5c;color:#fff;font-family:inherit;font-size:.92rem;font-weight:600;
+ box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer}
+#btn-filtros.oculto{display:none}
+#badge-filtros{display:none;align-items:center;justify-content:center;min-width:19px;height:19px;
+ padding:0 5px;border-radius:10px;background:#e74c3c;color:#fff;font-size:.68rem;font-weight:700}
+#fondo-panel{display:none;position:fixed;top:0;left:0;right:0;bottom:0;
+ background:rgba(0,0,0,.42);z-index:1140}
+#cerrar-panel{display:none;width:100%;padding:9px;margin-bottom:2px;border:none;
+ border-radius:8px;background:#eef1f6;color:#1a3a5c;font-family:inherit;
+ font-size:.86rem;font-weight:600;cursor:pointer}
+
+@media (max-width:768px){
+  /* Altura real del viewport en movil (100vh no descuenta la barra del navegador) */
+  html{height:100%}
+  body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+
+  #header{padding:9px 12px;flex-shrink:0}
+  #header .titulo{font-size:.95rem}
+  #header .sub{font-size:.6rem;line-height:1.3;margin-top:2px;
+   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #header .meta{font-size:.6rem;line-height:1.25;flex-shrink:0;margin-left:8px}
+
+  /* KPIs: tira horizontal deslizable en vez de envolver en varias filas */
+  #kpis{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+   gap:6px;padding:7px 10px;flex-shrink:0;scrollbar-width:none}
+  #kpis::-webkit-scrollbar{display:none}
+  .kpi{min-width:58px;padding:5px 9px;flex-shrink:0}
+  .kpi .valor{font-size:1.15rem}
+  .kpi .etiqueta{font-size:.55rem;letter-spacing:.2px;white-space:nowrap}
+  .kpi-sep{margin:0 1px}
+
+  /* El mapa ocupa el espacio restante, sin el calc() de altura fija */
+  #main{flex:1 1 auto;height:auto;min-height:0}
+  #map{height:100%;width:100%}
+
+  /* Panel de filtros convertido en cajon inferior deslizable */
+  #panel{position:fixed;left:0;right:0;bottom:0;top:auto;width:auto;min-width:0;
+   z-index:1200;max-height:72dvh;border-right:none;border-radius:16px 16px 0 0;
+   box-shadow:0 -4px 24px rgba(0,0,0,.28);gap:16px;
+   padding:22px 16px calc(16px + env(safe-area-inset-bottom));
+   transform:translateY(102%);transition:transform .26s ease}
+  #panel.abierto{transform:translateY(0)}
+  #panel::before{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);
+   width:38px;height:4px;border-radius:2px;background:#ccd}
+
+  /* Areas tactiles de 44px minimo */
+  .filtro-grupo h3{font-size:.78rem}
+  .check-label{padding:11px 4px;font-size:.95rem;gap:11px;min-height:44px}
+  .check-custom{width:20px;height:20px}
+  .check-label input:checked+.check-custom::after{left:5px;top:1px;width:6px;height:12px}
+  .btn-reset{padding:13px;font-size:.92rem;min-height:44px}
+  #contador{font-size:.8rem}
+
+  /* Popups adaptados al ancho de pantalla */
+  .leaflet-popup-content{min-width:0;max-width:calc(100vw - 90px);font-size:.88rem}
+
+  /* Mostrar los controles nuevos */
+  #btn-filtros{display:flex}
+  #btn-filtros.oculto{display:none}
+  #fondo-panel.visible{display:block}
+  #cerrar-panel{display:block}
+}
+/* =============== Fin del soporte movil =============== */</style>
 </head>
 <body>
 <div id="header">
   <div><div class="titulo">Mapa de Incidencias</div>
   <div class="sub">Obras de Emergencia 2026 &mdash; &Aacute;rea de Calidad Ambiental. Confederaci&oacute;n Hidrogr&aacute;fica del Guadiana</div></div>
-  <div class="meta">Actualizado:<br>10/08/2026 13:42</div>
+  <div class="meta">Actualizado:<br>10/08/2026 14:25</div>
 </div>
 <div id="kpis">
 <div class="kpi total"><div class="valor" id="kpi-total">55</div><div class="etiqueta">Total</div></div>
@@ -164,6 +232,58 @@ map.on("locationfound",function(e){
   .bindTooltip("Tu posicion actual",{permanent:false,direction:"top"});
 });
 map.on("locationerror",function(){console.log("Geolocalizacion no disponible.");});
+</script>
+<div id="fondo-panel"></div>
+<button id="btn-filtros" type="button">&#9776; Filtros <span id="badge-filtros"></span></button>
+<script>
+(function(){
+  var panel = document.getElementById("panel");
+  var fondo = document.getElementById("fondo-panel");
+  var btn   = document.getElementById("btn-filtros");
+  var badge = document.getElementById("badge-filtros");
+  if(!panel || !fondo || !btn) return;
+  var cerrar = document.createElement("button");
+  cerrar.id = "cerrar-panel";
+  cerrar.type = "button";
+  cerrar.innerHTML = "&#10005; Ver el mapa";
+  panel.insertBefore(cerrar, panel.firstChild);
+  function abrir(){
+    panel.classList.add("abierto");
+    fondo.classList.add("visible");
+    btn.classList.add("oculto");
+  }
+  function cerrarPanel(){
+    panel.classList.remove("abierto");
+    fondo.classList.remove("visible");
+    btn.classList.remove("oculto");
+  }
+  btn.addEventListener("click", abrir);
+  fondo.addEventListener("click", cerrarPanel);
+  cerrar.addEventListener("click", cerrarPanel);
+  function actualizarBadge(){
+    var cajas = panel.querySelectorAll("input[type=checkbox]");
+    var apagados = 0;
+    for(var i=0;i<cajas.length;i++){ if(!cajas[i].checked) apagados++; }
+    badge.textContent = apagados > 0 ? apagados : "";
+    badge.style.display = apagados > 0 ? "inline-flex" : "none";
+  }
+  var original = window.aplicarFiltros;
+  if(typeof original === "function"){
+    window.aplicarFiltros = function(){
+      var r = original.apply(this, arguments);
+      actualizarBadge();
+      return r;
+    };
+  }
+  actualizarBadge();
+  var t;
+  window.addEventListener("resize", function(){
+    clearTimeout(t);
+    t = setTimeout(function(){
+      try { if(typeof map !== "undefined" && map.invalidateSize) map.invalidateSize(); } catch(e){}
+    }, 220);
+  });
+})();
 </script>
 </body>
 </html>
